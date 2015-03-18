@@ -5,7 +5,7 @@ function TweetService(url) {
   this.sheetService = new GoogleSheetService(url);
 }
 
-TweetService.prototype.getRandomTweet = function (next) {
+TweetService.prototype.getAll = function (next) {
   this.sheetService.getData(function (result) {
     return next(result);
   });

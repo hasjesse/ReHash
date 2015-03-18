@@ -37,6 +37,8 @@ var gameStarted = false;
 var hash_tag_by_user= null;
 var numHashtags = null;
 var scores = [];
+var tweets = [];
+var hashtags = [];
 
 var TWEET_URL = "https://docs.google.com/spreadsheets/d/1azduyest2um3zrUJFvS5upGa2LO7cReg0hob6VtGCas/export?gid=625026020&format=csv";
 var HASHTAG_URL = "https://docs.google.com/spreadsheets/d/1azduyest2um3zrUJFvS5upGa2LO7cReg0hob6VtGCas/export?gid=0&format=csv";
@@ -66,14 +68,13 @@ io.on('connection', function (socket) {
     console.log('judge:', judge);
     console.log('players in the game: ', usernames);
 
-    tweetSvc.getRandomTweet(function (tweets) {
+
       var rand = Math.floor((Math.random() * tweets.length) + 1);
       tweet = tweets[Math.floor(Math.random()*tweets.length)];
 
       console.log('tweet retrieved:', tweet);
       hash_tag_by_user = [];
       numHashtags = usernames.length * 5;
-      hashTagSvc.getHashTags(5, function(userHashTags) {
         console.log("retrieving hashtags");
         hash_tag_by_user = {};
 
@@ -95,18 +96,23 @@ io.on('connection', function (socket) {
           judge: judge,
           scores: scores
         });
-      });
     });
   }
 
   function startGame(socket) {
     scores = [];
 
-    usernames.forEach(function (username, index) {
-      scores.push({username: username, score: 0});
-    });
+    tweetSvc.getAll(function (twts) {
+      tweets = twts;
+      usernames.forEach(function (username, index) {
+        scores.push({username: username, score: 0});
+      });
 
-    startRound(socket);
+      hashTagSvc.getHashTags(5, function(htags) {
+        hashtags = htags;
+        startRound(socket);
+      }
+    });
   }
 
   // when the client emits 'new message', this listens and executes
